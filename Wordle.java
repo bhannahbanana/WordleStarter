@@ -7,18 +7,18 @@
 
 import edu.willamette.cs1.wordle.WordleDictionary;
 import edu.willamette.cs1.wordle.WordleGWindow;
-import java.util.Map;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class Wordle {
-
+    Map <String, String> guesses = new HashMap<String, String>();
 
     public void run() {
+        
         randomWord = WordleDictionary.FIVE_LETTER_WORDS[(int) (Math.random() * (WordleDictionary.FIVE_LETTER_WORDS.length - 1))].toUpperCase();
         gw = new WordleGWindow();
         gw.addEnterListener((s) -> enterAction(s));
     }
+
 
 /*
  * Called when the user hits the RETURN key or clicks the ENTER button,
@@ -34,6 +34,8 @@ public class Wordle {
             String hint = getHint(s, randomWord);
             
             int row = gw.getCurrentRow(); 
+
+            guesses.put(s, hint);
             
             for (int col = 0; col < WordleGWindow.N_COLS; col++) {
                 char hintChar = hint.charAt(col);
@@ -66,6 +68,8 @@ public class Wordle {
                 gw.showMessage("Congratulations! You've guessed the word.");
                 for (int i=0; i<WordleGWindow.N_COLS; i++) {
                     gw.setSquareColor(gw.getCurrentRow(), i, WordleGWindow.Red_COLOR);
+
+                    //
                     //setSquareColor(int row, int col, Color color);
                     /*
                     public static final Color Red_COLOR = new Color(0xe06666);
@@ -92,6 +96,10 @@ public class Wordle {
                 }
             }
         } else {
+            if (s.length() < 5) {
+                System.out.println(listOfPossibleWords(guesses, WordleDictionary.FIVE_LETTER_WORDS));
+            }
+
             gw.showMessage("Not in word list");
         }
     }
