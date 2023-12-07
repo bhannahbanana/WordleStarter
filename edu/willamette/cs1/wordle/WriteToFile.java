@@ -1,9 +1,13 @@
 package edu.willamette.cs1.wordle;
+
 import java.io.PrintWriter;
 
 import java.io.FileOutputStream;
 
 import java.io.FileNotFoundException;
+import java.io.File;
+
+import java.util.*;
 
 public class WriteToFile {
 
@@ -46,4 +50,30 @@ public static void updateFile(String text)
 
           }
 
+
+public static List<String> readFile() {
+
+    List<String> updateList = new ArrayList<String>();
+
+    try {
+
+            Scanner input = new Scanner(new File("output.txt"));
+            
+            while (input.hasNext()) {
+                updateList.add(input.next());
+            }
+
+        } catch (FileNotFoundException e) {
+
+                 System.out.println("File not found");
+
+                 System.exit(0); }
+
+    return updateList;
 }
+
+
+
+
+}
+

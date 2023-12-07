@@ -68,7 +68,23 @@ public class Wordle {
     
             if (hint.equals(randomWord)) {
                 gw.showMessage("Congratulations! You've guessed the word.");
-                //updateFile
+
+                WriteToFile.updateFile(String.valueOf(gw.getCurrentRow()+1));
+                int[] history = new int[6];
+
+
+                for (String line : WriteToFile.readFile()) {
+                    history[Integer.parseInt(line)-1] ++;
+                }
+
+                for (int i=0; i < 6; i++) {
+                    System.out.print(i+1);
+                    System.out.print('\t');
+                    System.out.println(history[i]);
+
+                }
+
+
                 for (int i=0; i<WordleGWindow.N_COLS; i++) {
                     gw.setSquareColor(gw.getCurrentRow(), i, WordleGWindow.Red_COLOR);
 
