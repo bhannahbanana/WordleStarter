@@ -176,7 +176,7 @@ public class Wordle {
             if (guessStr.charAt(k) == '*') {
                 
             } else if (Character.isUpperCase(guessStr.charAt(k))) {
-                if (guessStr.charAt(k) != dicStr.charAt(k)) {
+                if (Character.toLowerCase(guessStr.charAt(k)) != Character.toLowerCase(dicStr.charAt(k))) {
                     return false;
                 }
 
@@ -192,7 +192,7 @@ public class Wordle {
 
     public static List<String> listOfPossibleWords(Map<String, String> guessToClue, String[] dictionary) {
 
-        List<String> copyDic = Arrays.asList(dictionary);
+        List<String> copyDic = new ArrayList<>(Arrays.asList(dictionary));
         
         for (String key : guessToClue.keySet()) {
 
