@@ -7,7 +7,9 @@
 
 import edu.willamette.cs1.wordle.WordleDictionary;
 import edu.willamette.cs1.wordle.WordleGWindow;
+import edu.willamette.cs1.wordle.WriteToFile;
 import java.util.*;
+
 
 public class Wordle {
     Map <String, String> guesses = new HashMap<String, String>();
@@ -66,6 +68,7 @@ public class Wordle {
     
             if (hint.equals(randomWord)) {
                 gw.showMessage("Congratulations! You've guessed the word.");
+                //updateFile
                 for (int i=0; i<WordleGWindow.N_COLS; i++) {
                     gw.setSquareColor(gw.getCurrentRow(), i, WordleGWindow.Red_COLOR);
 
@@ -174,16 +177,20 @@ public class Wordle {
     public static Boolean check(String guessStr, String dicStr) {
         for (int k = 0; k < 5; k++) {
             if (guessStr.charAt(k) == '*') {
-                
+                //if (dicStr.contains(String.valueOf(dicStr.charAt(k)))) {
+                //    return false;
+                //}
             } else if (Character.isUpperCase(guessStr.charAt(k))) {
                 if (Character.toLowerCase(guessStr.charAt(k)) != Character.toLowerCase(dicStr.charAt(k))) {
                     return false;
                 }
 
             } else {
-                if (!dicStr.contains(String.valueOf(guessStr.charAt(k)))) {
+                int idx = dicStr.indexOf(String.valueOf(guessStr.charAt(k)));
+                //if (!dicStr.contains(String.valueOf(guessStr.charAt(k)))) {
+                if (idx < 0 || idx == k) {
                     return false;
-                }
+                } 
 
             }
         }
