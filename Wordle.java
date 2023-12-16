@@ -1,18 +1,14 @@
-/*
- * File: Wordle.java
- * -----------------
- * This module is the starter file for the Wordle assignment.
- * BE SURE TO UPDATE THIS COMMENT WHEN YOU COMPLETE THE CODE.
- */
-
 import edu.willamette.cs1.wordle.WordleDictionary;
 import edu.willamette.cs1.wordle.WordleGWindow;
-import edu.willamette.cs1.wordle.WriteToFile;
+//import edu.willamette.cs1.wordle.WriteToFile;
+import javax.swing.Timer;
 import java.util.*;
+import java.awt.Color;
 
 
 public class Wordle {
     Map <String, String> guesses = new HashMap<String, String>();
+    private Timer timer = new Timer(500, e -> colorRow());
 
     public void run() {
         
@@ -30,8 +26,6 @@ public class Wordle {
     public void enterAction(String s) {
 
         if (isValidWord(s)) {
-
-
 
             String hint = getHint(s, randomWord);
             
@@ -69,40 +63,24 @@ public class Wordle {
             if (hint.equals(randomWord)) {
                 gw.showMessage("Congratulations! You've guessed the word.");
 
-                WriteToFile.updateFile(String.valueOf(gw.getCurrentRow()+1));
-                int[] history = new int[6];
+                // WriteToFile.updateFile(String.valueOf(gw.getCurrentRow()+1));
+                // int[] history = new int[6];
 
 
-                for (String line : WriteToFile.readFile()) {
-                    history[Integer.parseInt(line)-1] ++;
-                }
+                // for (String line : WriteToFile.readFile()) {
+                //     history[Integer.parseInt(line)-1] ++;
+                // }
 
-                for (int i=0; i < 6; i++) {
-                    System.out.print(i+1);
-                    System.out.print('\t');
-                    System.out.println(history[i]);
+                // for (int i=0; i < 6; i++) {
+                //     System.out.print(i+1);
+                //     System.out.print('\t');
+                //     System.out.println(history[i]);
 
-                }
+                // }
 
 
                 for (int i=0; i<WordleGWindow.N_COLS; i++) {
-                    gw.setSquareColor(gw.getCurrentRow(), i, WordleGWindow.Red_COLOR);
-
-                    //
-                    //setSquareColor(int row, int col, Color color);
-                    /*
-                    public static final Color Red_COLOR = new Color(0xe06666);
-
-                    public static final Color Orange_COLOR = new Color(0xf6b26b);
-
-                    public static final Color Yellow_COLOR = new Color(0xffd966);
-
-                    public static final Color Green_COLOR = new Color(0x93c47d);
-
-                    public static final Color Blue_COLOR = new Color(0x6fa8dc);
-
-                    public static final Color Purple_COLOR = new Color(0x8e7cc3);
-                    */
+                    timer.start();
                 }
             } else {
                 int currentRow = gw.getCurrentRow();
@@ -121,6 +99,21 @@ public class Wordle {
 
             gw.showMessage("Not in word list");
         }
+    }
+
+    private final String[] rainbowColors = {"#e81416", "#ffa500", "#faeb36", "#79c314", "#487de7", "#4b369d", "#70369d"};
+    private int currentColorIndex = 0;
+
+    private void colorRow() {
+
+        Color[] colorArray = new Color[rainbowColors.length];
+        for (int i = 0; i < rainbowColors.length; i++) {
+        colorArray[i] = Color.decode(rainbowColors[i]);
+        }
+        for (int col = 0; col < WordleGWindow.N_COLS; col++) {
+            gw.setSquareColor(gw.getCurrentRow(), col, colorArray[currentColorIndex]);
+        }
+        currentColorIndex = (currentColorIndex + 1) % colorArray.length;
     }
 
     private boolean isValidWord(String word) {
@@ -190,45 +183,55 @@ public class Wordle {
      * returns the following list of possible words: [glide, glued, guile]
      * 
      */
-    public static Boolean check(String guessStr, String dicStr) {
-        for (int k = 0; k < 5; k++) {
-            if (guessStr.charAt(k) == '*') {
-                //if (dicStr.contains(String.valueOf(dicStr.charAt(k)))) {
-                //    return false;
-                //}
-            } else if (Character.isUpperCase(guessStr.charAt(k))) {
-                if (Character.toLowerCase(guessStr.charAt(k)) != Character.toLowerCase(dicStr.charAt(k))) {
-                    return false;
-                }
-
-            } else {
-                int idx = dicStr.indexOf(String.valueOf(guessStr.charAt(k)));
-                //if (!dicStr.contains(String.valueOf(guessStr.charAt(k)))) {
-                if (idx < 0 || idx == k) {
-                    return false;
-                } 
-
-            }
-        }
-        return true;
-    }
 
     public static List<String> listOfPossibleWords(Map<String, String> guessToClue, String[] dictionary) {
-
         List<String> copyDic = new ArrayList<>(Arrays.asList(dictionary));
         
+        List<Character>[] availList = new ArrayList[5];
+        boolean[] fixedList = new boolean[5];
+        List<Character> needList = new ArrayList<Character>();
+
+        for (int i = 0; i < 5; i++) {
+            availList[i] = new ArrayList<Character>();
+            for (char j = 'A'; j <= 'Z'; j++)
+                availList[i].add(j);
+        }
+
         for (String key : guessToClue.keySet()) {
-
-            for ( int j = 0; j < dictionary.length; j++) {
-
-                String wordInDic = dictionary[j];
-                if (!check(guessToClue.get(key), wordInDic)) {
-                    copyDic.remove(wordInDic);
-
-                } 
-
+            for (int i = 0; i < 5; i++) {
+                if (Character.isUpperCase(guessToClue.get(key).charAt(i))) { 
+                    fixedList[i] = true;
+                    availList[i] = new ArrayList<Character>();
+                    availList[i].add(Character.valueOf(key.charAt(i)));
+                } else if (Character.isLowerCase(guessToClue.get(key).charAt(i))) { 
+                    availList[i].remove(Character.valueOf(key.charAt(i)));
+                    needList.add(Character.valueOf(key.charAt(i)));
+                } else {
+                    for (int j = 0; j < 5; j++)
+                        if (!fixedList[j])
+                            availList[j].remove(Character.valueOf(key.charAt(i)));
+                }
             }
         }
+        
+        outerLoop:
+        for (String word : dictionary) {
+            
+            for (Character c : needList) {
+                if (word.indexOf(Character.toLowerCase(c)) < 0) {
+                    copyDic.remove(word);
+                    continue outerLoop;
+                }
+            }
+
+            for (int i = 0; i < 5; i++) {
+                if (!availList[i].contains(Character.toUpperCase(word.charAt(i)))) {
+                    copyDic.remove(word);
+                    continue outerLoop;
+                }
+            }
+        }
+
         return copyDic;
     }
 
